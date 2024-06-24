@@ -1,5 +1,7 @@
 package com.aws.dynamodb.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -35,11 +37,13 @@ public class DynamoDBController {
     } 
 	
 	@GetMapping("/allArticle") 
-    public void fetchRecordsFromDynamoDBArticleTable() 
+    public List<Article> fetchRecordsFromDynamoDBArticleTable() 
     { 
 		for (Article article : articleDao.scan()) {
 			System.out.println("article = " + article);
 		}
+		
+		return articleDao.scan();
     }
 	
 	@GetMapping("/article/{id}") 
