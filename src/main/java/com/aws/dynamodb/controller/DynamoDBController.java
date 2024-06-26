@@ -3,11 +3,12 @@ package com.aws.dynamodb.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aws.dynamodb.entity.Article;
@@ -20,51 +21,55 @@ public class DynamoDBController {
 	private ArticleDao articleDao;
 	
 	@PostMapping("/saveArticle") 
-    public void saveToDynamoDBArticleTable() 
+    public String saveToDynamoDBArticleTable(@RequestBody Article article) 
     { 
-		Article article1 = Article.builder()
-				.id("2")
-				.title("t1")
-				.content("c1")
+		Article articleToSave = Article.builder()
+				.id(article.getId())
+				.title(article.getTitle())
+				.content(article.getContent())
 				.build();
-		Article article2 = Article.builder()
-				.id("3")
-				.title("t2")
-				.content("c2")
-				.build();
-		articleDao.save(article1);
-		articleDao.save(article2);
+
+		articleDao.save(articleToSave);
+		return "Article with id "+ article.getId()+ " , is saved successfully.";
     } 
 	
 	@GetMapping("/allArticle") 
     public List<Article> fetchRecordsFromDynamoDBArticleTable() 
     { 
-		for (Article article : articleDao.scan()) {
-			System.out.println("article = " + article);
-		}
-		
 		return articleDao.scan();
     }
 	
 	@GetMapping("/article/{id}") 
     public Article fetchRecordsFromDynamoDBArticleTable(@PathVariable("id") String id ) 
     { 
-		Article a = articleDao.getItem(id);
-		System.out.println("a = " + a);
-		return a;
+		Article article = articleDao.getItem(id);
+		if(null!=article) {
+			return article;
+		}else {
+			//Here no article exist message is added in title if Article class itself, 
+			//but in practice there should be separate response object designed for this.
+			return new Article(id.toString(),"No Article exist with id " +id,"");
+		}
+		
     }
 	
-	@PutMapping("/updateArticle")///{id}") 
-    public void updateRecordInDynamoDBArticleTable()//@PathVariable("id") String id ) 
+	@PutMapping("/updateArticle")
+    public String updateRecordInDynamoDBArticleTable(@RequestBody Article article)
     { 
-		System.out.println("inside controller");
-		Article article1 = Article.builder()
-				.id("2")
-				.title("t1_updated")
-				.content("c1_updated")
+		Article updateArticle = Article.builder()
+				.id(article.getId())
+				.title(article.getTitle())
+				.content(article.getContent())
 				.build();
-		articleDao.update(article1);
-		//System.out.println("a = " + a);
-		//return a;
+		articleDao.update(updateArticle);
+		return "Article with id "+ article.getId()+ " , is updated successfully.";
+    }
+	
+	@DeleteMapping("/article/{id}") 
+    public String deleteRecordsFromDynamoDBArticleTable(@PathVariable("id") String id ) 
+    { 
+		Article article = articleDao.getItem(id);
+		articleDao.delete(article);
+		return "Article with id "+ article.getId()+ " , is deleted successfully.";
     }
 }

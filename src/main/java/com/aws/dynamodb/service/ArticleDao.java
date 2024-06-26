@@ -25,7 +25,6 @@ public class ArticleDao {
     }
 
     public void save(Article article) {
-    	System.out.println(article);
         getMappedTable(Article.class).putItem(article);
 
     }
@@ -39,8 +38,12 @@ public class ArticleDao {
     }
     
     public void update(Article article) {
-    	System.out.println("article = "+ article);
         getMappedTable(Article.class).putItem(article);
+
+    }
+    
+    public void delete(Article article) {
+        getMappedTable(Article.class).deleteItem(article);
 
     }
 
